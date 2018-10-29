@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="Encoding">
+    <file url="file://$PROJECT_DIR$/app/src/main/java/mi/email/activity/MailDetails.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/app/src/main/java/mi/email/activity/ReceiveAndSend.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/app/src/main/java/mi/email/activity/ReceiveList.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/app/src/main/java/mi/email/activity/SendMail.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/app/src/main/java/mi/email/activity/Welcome.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/app/src/main/java/mi/email/core/ResolveMail.java" charset="GBK" />
+    <file url="PROJECT" charset="UTF-8" />
+  </component>
+</project>

@@ -1,0 +1,37 @@
+apply plugin: 'com.android.application'
+android {
+    compileSdkVersion 28
+    buildToolsVersion "28.0.3"
+    defaultConfig {
+        applicationId "mi.learn.com"
+        versionCode = "1"
+        versionName = "1.0"
+        minSdkVersion 14
+        targetSdkVersion 28
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+        }
+    }
+
+    repositories {
+        maven { url 'https://maven.java.net/content/repositories/releases/' }
+    }
+
+    dependencies {
+        api fileTree(include: ['*.jar', '*.aar'], dir: 'libs')
+        implementation 'com.sun.mail:android-mail:1.6.2'
+        implementation 'com.sun.mail:android-activation:1.6.2'
+        implementation 'io.reactivex.rxjava2:rxjava:2.1.4'
+        implementation 'io.reactivex.rxjava2:rxandroid:2.0.1'
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    //https://www.cnblogs.com/zhujiabin/p/6252823.html
+}
