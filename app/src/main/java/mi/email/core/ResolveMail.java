@@ -5,6 +5,7 @@ import java.io.UnsupportedEncodingException;
 import java.text.Format;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 import java.util.Properties;
 
 import javax.mail.Address;
@@ -30,7 +31,7 @@ public class ResolveMail {// 接受邮件
 
 	private MimeMessage mineMsg = null;
 	private StringBuffer mailContent = new StringBuffer();// 邮件内容
-	private String dataFormat = "yy-MM-dd HH:mm";// 时间
+	private static final String dataFormat = "yy-MM-dd HH:mm";// 时间
 
 	/**
 	 * 构造函数
@@ -53,9 +54,9 @@ public class ResolveMail {// 接受邮件
 	 * @throws MessagingException
 	 */
 
-	public String getFrom() throws MessagingException {
+	public static String getFrom(MimeMessage message) throws MessagingException {
 
-		InternetAddress address[] = (InternetAddress[]) mineMsg.getFrom();
+		InternetAddress address[] = (InternetAddress[]) message.getFrom();
 		String addr = address[0].getAddress();
 		String name = address[0].getPersonal();
 
@@ -135,16 +136,15 @@ public class ResolveMail {// 接受邮件
 	 * @throws UnsupportedEncodingException
 	 */
 
-	public String getSubject() throws UnsupportedEncodingException,
+	public static String getSubject(MimeMessage message) throws UnsupportedEncodingException,
 			MessagingException {
 		String subject = "";
-		subject = MimeUtility.decodeText(mineMsg.getSubject());
+		subject = MimeUtility.decodeText(message.getSubject());
 		if (subject == null) {
 			subject = "";
 
 		}
 		return subject;
-
 	}
 
 	/**
@@ -152,25 +152,14 @@ public class ResolveMail {// 接受邮件
 	 * 
 	 * @throws MessagingException
 	 */
-	public String getSentDate() throws MessagingException {
-		Date sentdata = mineMsg.getSentDate();
+	public static String getSentDate(MimeMessage message) throws MessagingException {
+		Date sentdata = message.getSentDate();
 		if (sentdata != null) {
-			SimpleDateFormat format = new SimpleDateFormat(dataFormat);// 这个SimpleDateFormat,dataFormat是什么?为什么要这么用呢？
+			SimpleDateFormat format = new SimpleDateFormat(dataFormat, Locale.CHINA);
 			return format.format(sentdata);
 		} else {
-
 			return "不清楚";
 		}
-	}
-
-	/**
-	 * 取得邮件内容
-	 * 
-	 * @throws Exception
-	 */
-	public String getMailContent() throws Exception {
-		compileMailContent((Part) mineMsg);
-		return mailContent.toString();
 	}
 
 	public void setMailContent(StringBuffer mailContent) {
@@ -185,33 +174,27 @@ public class ResolveMail {// 接受邮件
 	 * @throws IOException
 	 * @throws Exception
 	 */
-	public void compileMailContent(Part part) throws MessagingException,
+	public static String getMailContent(Part part) throws MessagingException,
 			IOException {
+		StringBuilder sb = new StringBuilder();
 		String contentType = part.getContentType();// 获取类型
-		int nameIndex = contentType.indexOf("name");// 得到和name对应的的nameIndex
-		if (nameIndex != -1) {// 为什么nameIndex会出现-1的情况呢？ connName = true; }
+		//int nameIndex = contentType.indexOf("name");// 得到和name对应的的nameIndex
+		//if (nameIndex != -1) {// 为什么nameIndex会出现-1的情况呢？ connName = true; }
 			boolean connName = false;// 这个boolean变量定义有什么用呢？
 			if (part.isMimeType("text/plain") && !connName) {// isMimeType里的参数是？
-				mailContent.append((String) part.getContent());// part.getContent()
+				sb.append((String) part.getContent());// part.getContent()
 			} else if (part.isMimeType("text/html") && !connName) {
-				mailContent.append((String) part.getContent());
+				sb.append((String) part.getContent());
 			} else if (part.isMimeType("multipart/*")) {
 				Multipart multipart = (Multipart) part.getContent();// Multipart作用是什么？
 				int counts = multipart.getCount();// getCount()是什么意思？
 				for (int i = 0; i < counts; i++) {
-					compileMailContent(multipart.getBodyPart(i));// getBodyPart()
+					sb.append(getMailContent(multipart.getBodyPart(i)));// getBodyPart()
 				}
 			} else if (part.isMimeType("message/rfc822")) {
-				compileMailContent((Part) part.getContent());
+				sb.append(getMailContent((Part) part.getContent()));
 			}
-		}
+		//}
+		return sb.toString();
 	}
-
-	/**
-	 * 设定收信日期格式
-	 */
-	public void setDataFormat(String dataFormat) {
-		this.dataFormat = dataFormat;
-	}
-
 }

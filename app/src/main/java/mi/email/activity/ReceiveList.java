@@ -65,15 +65,13 @@ public class ReceiveList extends Activity {
                 R.id.title, R.id.info});
         listview.setAdapter(listAdapter);
         // Item长按事件。得到Item的值，然后传递给MailDetail的值
-        listview.setOnItemLongClickListener(new OnItemLongClickListener() {
-            public boolean onItemLongClick(AdapterView<?> arg0, View arg1,
-                                           int position, long id) {
-                // TODO Auto-generated method stub
+        listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Intent intent = new Intent();
                 intent.putExtra("ID", position);
                 intent.setClass(ReceiveList.this, MailDetails.class);
                 startActivity(intent);
-                return true;
             }
         });
         MenuList();
@@ -98,13 +96,13 @@ public class ReceiveList extends Activity {
             Folder folder = null; // 设置仅读
             folder = store.getFolder("INBOX");
             folder.open(Folder.READ_ONLY); // 获取信息
-            Message message[] = folder.getMessages();
+            Message messages[] = folder.getMessages();
 
-            for (int i = 0; i < message.length; i++) {//通过for语句将读取到的邮件内容一个一个的在list中显示出来
-                ResolveMail receivemail = new ResolveMail((MimeMessage) message[i]);
-
-                Title = receivemail.getSubject();//得到邮件的标题
-                Date = receivemail.getSentDate();//得到邮件的发送时间
+            for (int i = 0; i < messages.length; i++) {//通过for语句将读取到的邮件内容一个一个的在list中显示出来
+                //ResolveMail receivemail = new ResolveMail((MimeMessage) message[i]);
+                MimeMessage message = (MimeMessage) messages[i];
+                Title = ResolveMail.getSubject(message);//得到邮件的标题
+                Date = ResolveMail.getSentDate(message);//得到邮件的发送时间
 
                 HashMap<String, String> map = new HashMap<String, String>();//定义一个Map.将获取的内容以键值的方式将内容展现
                 map.put("title", Title);//显示邮件的标题

@@ -15,6 +15,14 @@ import javax.mail.Session;
 import javax.mail.Store;
 import javax.mail.internet.MimeMessage;
 
+import io.reactivex.Observable;
+import io.reactivex.ObservableEmitter;
+import io.reactivex.ObservableOnSubscribe;
+import io.reactivex.Scheduler;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Consumer;
+import io.reactivex.schedulers.Schedulers;
 import mi.email.core.ResolveMail;
 import mi.learn.com.R;
 
@@ -22,72 +30,132 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.TextView;
 
 public class MailDetails extends Activity {
-	private static final String SAVE_INFORMATION = "save_information";
-	private TextView text1;
-	private TextView text2;
-	private TextView text3;
-	private TextView text4;
-	private ReceiveList ml;
+    private static final String SAVE_INFORMATION = "save_information";
+    private static final String TAG = "MailDetails";
+    private TextView text1;
+    private TextView text2;
+    private TextView text3;
+    private TextView text4;
+    private ReceiveList ml;
 
-	public void receive() throws Exception {
+    private class MailContent {
+        private String title;
+        private String from;
+        private String date;
+        private String content;
 
-		// sharedpreference¶ÁÈ¡Êı¾İ£¬ÓÃsplit£¨£©·½·¨£¬·Ö¿ª×Ö·û´®¡£
-		SharedPreferences pre = getSharedPreferences(SAVE_INFORMATION,MODE_PRIVATE);
-		String content = pre.getString("save", "");
-		String[] Information = content.split(";");
-		String username = Information[0];
-		String password = Information[1];
+        public String getTitle() {
+            return title;
+        }
 
-	    Intent intent = getIntent();//µÃµ½ÉÏÒ»¸öÎÄ¼ş´«ÈëµÄIDºÅ
-		Bundle i = intent.getExtras();
-		
-		int num = i.getInt("ID");//½«µÃµ½µÄIDºÅ´«µİ¸ø±äÁ¿num
-		
-		Properties props = new Properties();
-		Session session = Session.getDefaultInstance(props);
-		// È¡µÃpop3Ğ­ÒéµÄÓÊ¼ş·şÎñÆ÷
-		Store store = session.getStore("pop3");
-		// Á¬½Ópop.qq.comÓÊ¼ş·şÎñÆ÷
-		store.connect("pop.sina.com", username, password);
-		// ·µ»ØÎÄ¼ş¼Ğ¶ÔÏó
-		Folder folder = store.getFolder("INBOX");
-		// ÉèÖÃ½ö¶Á
-		folder.open(Folder.READ_ONLY);
+        public void setTitle(String title) {
+            this.title = title;
+        }
 
-		// »ñÈ¡ĞÅÏ¢
-		Message message[] = folder.getMessages();
-		ResolveMail receivemail = new ResolveMail((MimeMessage) message[num]);
-		text1.setText(receivemail.getSubject());
-		text2.setText(receivemail.getFrom());
-		text3.setText(receivemail.getSentDate());
-		text4.setText((CharSequence) message[num].getContent().toString());
+        public String getFrom() {
+            return from;
+        }
 
-		folder.close(true);
-		store.close();
+        public void setFrom(String from) {
+            this.from = from;
+        }
 
-	}
+        public String getDate() {
+            return date;
+        }
 
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		// TODO Auto-generated method stub
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.main2);
+        public void setDate(String date) {
+            this.date = date;
+        }
 
-		text1 = (TextView) findViewById(R.id.text1);
-		text2 = (TextView) findViewById(R.id.text2);
-		text3 = (TextView) findViewById(R.id.text3);
-		text4 = (TextView) findViewById(R.id.text4);
+        public String getContent() {
+            return content;
+        }
 
-		try {
-			receive();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+        public void setContent(String content) {
+            this.content = content;
+        }
+    }
 
-	}
+    public void receive() throws Exception {
+
+        // sharedpreferenceè¯»å–æ•°æ®ï¼Œç”¨splitï¼ˆï¼‰æ–¹æ³•ï¼Œåˆ†å¼€å­—ç¬¦ä¸²ã€‚
+        SharedPreferences pre = getSharedPreferences(SAVE_INFORMATION, MODE_PRIVATE);
+        String content = pre.getString("save", "");
+        String[] Information = content.split(";");
+        String username = Information[0];
+        String password = Information[1];
+
+        Intent intent = getIntent();
+        Bundle i = intent.getExtras();
+
+        int num = i.getInt("ID");//å¾—åˆ°ä¸Šä¸€ä¸ªæ–‡ä»¶ä¼ å…¥çš„IDå·
+
+        Disposable disposable = Observable.create(new ObservableOnSubscribe<MailContent>() {
+            @Override
+            public void subscribe(ObservableEmitter<MailContent> e) throws Exception {
+                Properties props = new Properties();
+                Session session = Session.getDefaultInstance(props);
+                // å–å¾—pop3åè®®çš„é‚®ä»¶æœåŠ¡å™¨
+                Store store = session.getStore("imap");
+                // è¿æ¥pop.qq.comé‚®ä»¶æœåŠ¡å™¨
+                store.connect("imap.exmail.qq.com", "liwei@satcatche.com", "Face12");
+                // è¿”å›æ–‡ä»¶å¤¹å¯¹è±¡
+                Folder folder = store.getFolder("INBOX");
+                // è®¾ç½®ä»…è¯»
+                folder.open(Folder.READ_ONLY);
+
+                // è·å–ä¿¡æ¯
+                //Message message[] = folder.getMessages();
+                MimeMessage message = (MimeMessage) folder.getMessages()[num];
+                MailContent mailContent = new MailContent();
+                mailContent.setTitle(ResolveMail.getSubject(message));
+                mailContent.setFrom(ResolveMail.getFrom(message));
+                mailContent.setDate(ResolveMail.getSentDate(message));
+                mailContent.setContent(ResolveMail.getMailContent(message));
+                e.onNext(mailContent);
+                folder.close(true);
+                store.close();
+            }
+        }).subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(mailContent -> {
+                    //ResolveMail receiveMail = new ResolveMail(message);
+                    text1.setText(mailContent.getTitle());
+                    text2.setText(mailContent.getFrom());
+                    text3.setText(mailContent.getDate());
+                    text4.setText(mailContent.getContent());
+                }, new Consumer<Throwable>() {
+                    @Override
+                    public void accept(Throwable throwable) throws Exception {
+                        Log.d(TAG, "error: " + throwable.toString());
+                        throwable.printStackTrace();
+                    }
+                });
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        // TODO Auto-generated method stub
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.main2);
+
+        text1 = (TextView) findViewById(R.id.text1);
+        text2 = (TextView) findViewById(R.id.text2);
+        text3 = (TextView) findViewById(R.id.text3);
+        text4 = (TextView) findViewById(R.id.text4);
+
+        try {
+            receive();
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+    }
 
 }
