@@ -1,16 +1,15 @@
 package mi.email.activity;
 
-import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import android.app.Activity;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.os.Bundle;
+import android.util.Log;
+import android.widget.TextView;
+
 import java.util.Properties;
 
 import javax.mail.Folder;
-import javax.mail.Message;
-import javax.mail.MessagingException;
-import javax.mail.Multipart;
-import javax.mail.NoSuchProviderException;
-import javax.mail.Part;
 import javax.mail.Session;
 import javax.mail.Store;
 import javax.mail.internet.MimeMessage;
@@ -18,20 +17,12 @@ import javax.mail.internet.MimeMessage;
 import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
 import io.reactivex.ObservableOnSubscribe;
-import io.reactivex.Scheduler;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 import mi.email.core.ResolveMail;
 import mi.learn.com.R;
-
-import android.app.Activity;
-import android.content.Intent;
-import android.content.SharedPreferences;
-import android.os.Bundle;
-import android.util.Log;
-import android.widget.TextView;
 
 public class MailDetails extends Activity {
     private static final String SAVE_INFORMATION = "save_information";
